@@ -1,0 +1,12 @@
+[submodule "libs/portaudio"]
+	path = libs/portaudio
+	url = https://github.com/PortAudio/portaudio
+[submodule "libs/imgui-knobs"]
+	path = libs/imgui-knobs
+	url = https://github.com/altschuler/imgui-knobs
+[submodule "libs/imgui"]
+	path = libs/imgui
+	url = https://github.com/ocornut/imgui
+[submodule "libs/dr_libs"]
+	path = libs/dr_libs
+	url = https://github.com/mackron/dr_libs
