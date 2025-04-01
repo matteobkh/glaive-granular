@@ -7,18 +7,9 @@
 
 #include "portaudio.h"
 
-#define MAX_GRAINS (20)
+#include "filemanager.h"
 
-// Stores audio data from file and playback information
-struct AudioData {
-    std::vector<float> samples;
-    int nChannels, sampleRate;
-    bool play;
-    int index;
-    size_t size;
-    int frames;
-    AudioData(std::vector<float> samplesVec = {}, int numChannels = 1, int sRate = 44100, bool p = false, int i = 0);
-};
+#define MAX_GRAINS (20)
 
 // Stereo grain with dynamic envelope
 class Grain {
@@ -59,13 +50,13 @@ public:
     void playback(float& l, float& r);
 
     // update parameters, to leave parameters the same input any number <=0
-    void updateParameters(float newSize = 0, float newStretch = 0, int newDensity = 0, int newHs = 0, int newHa = 0);
+    void updateParameters(float newSize = 0, float newStretch = 0, int newDensity = 0, int newHa = 0);
 };
 
 // Struct that contains all audio objects used in the program for easy access
 struct AudioEngine {
     int sampleRate;
-    AudioData audioData;
+    AudioFileData audioData;
 
     GranularEngine granEng;
     std::atomic<bool> granularPlaying{false};
@@ -76,7 +67,7 @@ struct AudioEngine {
     std::atomic<float> masterVolume; // Master volume
 
     // Constructor, please specify sample rate
-    AudioEngine(const int sr, AudioData aData, float vol = 1.0f);
+    AudioEngine(const int sr, AudioFileData aData, float vol = 1.0f);
     
     void processAudio(float& l, float& r);
 };
@@ -108,7 +99,5 @@ bool openAudio(PaDeviceIndex index, AudioEngine& audioEngine);
 bool closeAudio();
 bool startAudio();
 bool stopAudio();
-
-AudioData LoadWavFile(const char* filename);
 
 #endif // AUDIO_H

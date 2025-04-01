@@ -3,7 +3,7 @@
 CXX = g++
 
 # Name of the executable
-EXEC = audioAppGuiTest
+EXEC = GlaiveGranular
 
 # Directories
 SRC_DIR = ./src
@@ -13,7 +13,10 @@ IMGUI_KNOBS_DIR = ./libs/imgui-knobs
 DR_DIR = ./libs/dr_libs
 
 # Source files
-SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/audio.cpp $(SRC_DIR)/gui.cpp 
+## Project source files
+SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/audio.cpp $(SRC_DIR)/gui.cpp \
+	$(SRC_DIR)/widgets.cpp $(SRC_DIR)/filemanager.cpp
+## ImGui source files
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp \
 	$(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp \
 	$(IMGUI_DIR)/imgui_widgets.cpp
@@ -27,7 +30,7 @@ OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
 # Build flags, includes, links
-CXXFLAGS = -std=c++17 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
+CXXFLAGS = -std=c++20 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
 CXXFLAGS += -I$(IMGUI_KNOBS_DIR) -I$(PA_DIR)/include
 CXXFLAGS += -I$(DR_DIR) -I./include
 CXXFLAGS += -g -Wall -Wformat -pthread

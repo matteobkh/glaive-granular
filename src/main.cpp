@@ -1,4 +1,4 @@
-/* Glaive Granular Synthesizer
+/* Glaive Granular Sampler
 Matteo Bukhgalter 2025 */
 
 #include "imgui.h"
@@ -23,10 +23,10 @@ namespace fs = std::filesystem;
 
 #define SAMPLE_RATE (44100)
 
-int paErrorHandling(PaError err);
+static int paErrorHandling(PaError err);
 
 // declared in filemanager.h
-std::vector<const char*> files;
+std::vector<std::string> FileManager::files;
 
 // Main code
 int main(int, char**)
@@ -79,7 +79,7 @@ int main(int, char**)
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Glaive Granular", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+    SDL_Window* window = SDL_CreateWindow("Glaive Granular", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 650, window_flags);
     if (window == nullptr)
     {
         printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -106,33 +106,53 @@ int main(int, char**)
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
+    ImGui::GetStyle().AntiAliasedFill = true;
+    ImGui::GetStyle().AntiAliasedLines = true;
 
+    // -- Custom style --
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.FrameRounding = 3.0f;
+    ImVec4* colors = style.Colors;
+    // Darker Background
+    colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.0f);
+    // Buttons - Soft Pastel Green
+    colors[ImGuiCol_Button] = ImVec4(0.50f, 0.75f, 0.50f, 1.0f);  
+    colors[ImGuiCol_ButtonHovered] = ImVec4(0.55f, 0.80f, 0.55f, 1.0f);
+    colors[ImGuiCol_ButtonActive] = ImVec4(0.45f, 0.70f, 0.45f, 1.0f);
+    // Frame Borders & Elements - Lighter Green
+    colors[ImGuiCol_FrameBg] = ImVec4(0.40f, 0.60f, 0.40f, 0.40f);
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.45f, 0.65f, 0.45f, 0.55f);
+    colors[ImGuiCol_FrameBgActive] = ImVec4(0.50f, 0.70f, 0.50f, 0.70f);
+    // Text - White
+    colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    // ComboBox
+    colors[ImGuiCol_Header] = ImVec4(0.50f, 0.75f, 0.50f, 1.0f);  
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.55f, 0.80f, 0.55f, 1.0f);
+    colors[ImGuiCol_HeaderActive] = ImVec4(0.45f, 0.70f, 0.45f, 1.0f);
+    // Checkbox
+    colors[ImGuiCol_CheckMark] = ImVec4(0.50f, 0.75f, 0.50f, 1.0f);
+    // Sliders
+    colors[ImGuiCol_SliderGrab] = ImVec4(0.50f, 0.75f, 0.50f, 1.0f);  
+    colors[ImGuiCol_SliderGrabActive] = ImVec4(0.45f, 0.70f, 0.45f, 1.0f);
+    // Scrollbar
+    colors[ImGuiCol_ScrollbarBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.0f);
+    colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.50f, 0.75f, 0.50f, 1.0f);
+    colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.55f, 0.80f, 0.55f, 1.0f);
+    colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.45f, 0.70f, 0.45f, 1.0f);    
+    
     // Setup Platform/Renderer backends
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    // - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != nullptr);
+    io.Fonts->AddFontFromFileTTF("libs/imgui/misc/fonts/DroidSans.ttf", 15.0f);
 
+    // Load audio files from working directory
     std::vector<std::string> files_strings;
-
     try {
         for (const auto& entry : fs::directory_iterator(fs::current_path())) {
-            if (entry.is_regular_file() && entry.path().extension() == ".wav") {
+            auto ext = entry.path().extension();
+            if (entry.is_regular_file() && (ext == ".wav" || ext == ".flac" || ext == ".mp3")) {
                 files_strings.push_back(entry.path().filename());
             }
         }
@@ -141,11 +161,10 @@ int main(int, char**)
     } catch (const std::exception& e) {
         std::cerr << "General error: " << e.what() << '\n';
     }
-
     std::cout << "Audio files found:" << std::endl;
-    for (auto f : files_strings) {
+    for(auto& f : files_strings) {
         std::cout << f << std::endl;
-        files.push_back(f.c_str());
+        FileManager::files.push_back(f);
     }
 
     // Our state
@@ -155,24 +174,17 @@ int main(int, char**)
     ScopedPaHandler paInit;
     if(paInit.result() != paNoError) return paErrorHandling(paInit.result());
 
-    //AudioData wavfile = LoadWavFile("seemyface.wav");
-
-    AudioData emptyBuffer(std::vector<float>(44100, 0.0f)); // 1 second of silence at 44.1 kHz, 1 channel
+    AudioFileData emptyBuffer(std::vector<float>(44100, 0.0f)); // 1 second of silence at 44.1 kHz, 1 channel
 
     AudioEngine audioEngine(SAMPLE_RATE, emptyBuffer);
     openAudio(Pa_GetDefaultOutputDevice(), audioEngine);
-    std::cout << std::endl; // Pa_GetDefaultOutputDevice() logs without endl
+    std::cout << std::endl; // because Pa_GetDefaultOutputDevice() logs without endl
     startAudio();
 
     // Main loop
     bool done = false;
     while (!done)
     {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -192,6 +204,12 @@ int main(int, char**)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
+
+        int width, height;
+        SDL_GetWindowSize(window, &width, &height);
+
+        ImGui::SetNextWindowSize(ImVec2((float)width, (float)height), ImGuiCond_Always);
+        ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 
         renderGUI(audioEngine);
 
@@ -219,7 +237,7 @@ int main(int, char**)
     return 0;
 }
 
-int paErrorHandling(PaError err) {
+static int paErrorHandling(PaError err) {
     fprintf(stderr, "An error occurred while using the portaudio stream\n");
     fprintf(stderr, "Error number: %d\n", err);
     fprintf(stderr, "Error message: %s\n", Pa_GetErrorText(err));
