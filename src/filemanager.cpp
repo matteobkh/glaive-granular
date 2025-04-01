@@ -19,7 +19,7 @@ working directory */
 
 // -- global variables definitions --
 bool FileManager::fileSelected = false;
-std::vector<std::string> files;
+std::vector<std::string> FileManager::files;
 
 // AudioFileData struct def
 AudioFileData::AudioFileData(std::vector<float> samplesVec, int numChannels, int sRate) 

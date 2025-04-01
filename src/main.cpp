@@ -25,9 +25,6 @@ namespace fs = std::filesystem;
 
 static int paErrorHandling(PaError err);
 
-// declared in filemanager.h
-std::vector<std::string> FileManager::files;
-
 // Main code
 int main(int, char**)
 {
@@ -105,12 +102,11 @@ int main(int, char**)
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
-    ImGui::GetStyle().AntiAliasedFill = true;
-    ImGui::GetStyle().AntiAliasedLines = true;
 
     // -- Custom style --
     ImGuiStyle& style = ImGui::GetStyle();
+    style.AntiAliasedFill = true;
+    style.AntiAliasedLines = true; 
     style.FrameRounding = 3.0f;
     ImVec4* colors = style.Colors;
     // Darker Background
