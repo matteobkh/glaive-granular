@@ -9,7 +9,8 @@ Current makefile works for MacOS (10.6+) and Linux. Clone repo and submodules wi
 - ~Pitch shifting option ✅~
 - _Improve_ pitch shifting, locked to semitones + fine tuning knob
 - Reverse grain probability
-- Fix time jitter (higher values cause clicks)
+- ~Fix time jitter (higher values cause clicks) ✅~
 - Add sample chopping
 - Add MIDI capability
-- Fix jitter and spread knob behaviors, very small increments are very noticeable so I'd like them to behave logarithmically but still be able to go to zero, not 0.1
+- Fix spread knob behavior, very small increments are very noticeable so I'd like it to behave logarithmically but still be able to go to zero, not 0.1
+- Reverse playback (negative playback speed)

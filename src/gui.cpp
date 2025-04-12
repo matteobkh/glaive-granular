@@ -97,6 +97,7 @@ void renderGUI(AudioEngine& audioEngine) {
         float knobWidth = ImGui::GetTextLineHeight() * 4.0f;  // Default knob size
         float spacing = (windowWidth - (knobsPerRow * knobWidth)) / knobsPerRow; // Even spacing
 
+        ImGui::SeparatorText("Granular parameters");
         // Knob for pitch
         if (ImGuiKnobs::Knob("Pitch", &audioEngine.granEng.pitch, 0.1, 4, knobSpeed, "%.3f", ImGuiKnobVariant_Tick)) {
             // Recalculate the granular engine parameters whenever the grain size is updated
@@ -118,7 +119,7 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(padding + 2 * (knobWidth + spacing)); // Position knob
         // Knob for Stretch Factor (values between 0.1 and 10.0)
-        if (ImGuiKnobs::Knob("Stretch Factor", &audioEngine.granEng.stretch, 0.1f, 10.0f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick)) {
+        if (ImGuiKnobs::Knob("Speed", &audioEngine.granEng.stretch, 0.1f, 10.0f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick)) {
             // Recalculate the granular engine parameters whenever the stretch factor is updated
             audioEngine.granEng.updateParameters(0, audioEngine.granEng.stretch);
         }
@@ -128,7 +129,7 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(padding + 3 * (knobWidth + spacing)); // Position knob
         // Knob for Grain Density (values between 1 and 100)
-        if (ImGuiKnobs::KnobInt("Grain Density", &audioEngine.granEng.density, 1, MAX_GRAINS, 0.0f, "%d", ImGuiKnobVariant_Stepped, 0, 0, MAX_GRAINS)) {
+        if (ImGuiKnobs::KnobInt("Density", &audioEngine.granEng.density, 1, MAX_GRAINS, 0.0f, "%d", ImGuiKnobVariant_Stepped, 0, 0, MAX_GRAINS)) {
             // Recalculate the granular engine parameters whenever the grain density is updated
             audioEngine.granEng.updateParameters(0,0,audioEngine.granEng.density);
         }
@@ -138,7 +139,7 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(padding + 4 * (knobWidth + spacing)); // Position knob
         // Knob for analysis hopsize (automatically updates synthesis hopsize)
-        if (ImGuiKnobs::KnobInt("Hopsize", &audioEngine.granEng.Ha, 100, 8000, knobSpeed, "%d", ImGuiKnobVariant_Tick)) {
+        if (ImGuiKnobs::KnobInt("Hopsize", &audioEngine.granEng.Ha, 100, 8000, 0.0f, "%d", ImGuiKnobVariant_Tick)) {
             // Recalculate the granular engine parameters whenever the grain size is updated
             audioEngine.granEng.updateParameters(0,0,0,audioEngine.granEng.Ha);
         }
@@ -146,7 +147,8 @@ void renderGUI(AudioEngine& audioEngine) {
             audioEngine.granEng.updateParameters(0,0,0,3000);
         }
 
-        ImGui::Text("Randomization parameters");
+        ImGui::SeparatorText("Randomization parameters");
+        //ImGui::Text("Randomization parameters");
         // Jitter knob
         ImGuiKnobs::Knob("Jitter", &audioEngine.granEng.jitterAmount, 0.0f, 1.0f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick);
         if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
@@ -155,7 +157,7 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(padding + spacing + knobWidth); // Position knob
         // Random pan knob
-        ImGuiKnobs::Knob("Random pan", &audioEngine.granEng.randomPanAmt, 0.0f, 0.5f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick);
+        ImGuiKnobs::Knob("Random pan", &audioEngine.granEng.randomPanAmt, 0.0f, 1.0f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick);
         if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
             audioEngine.granEng.randomPanAmt = 0.0f;
         }
@@ -168,7 +170,7 @@ void renderGUI(AudioEngine& audioEngine) {
         }
 
         // Display the current values for debugging
-        ImGui::Text("Current s. index: %d", audioEngine.granEng.index);
+        /* ImGui::Text("Current s. index: %d", audioEngine.granEng.index);
         ImGui::Text(
             "Current a. index: %d", 
             static_cast<int>(1.0f * audioEngine.granEng.index / audioEngine.granEng.stretch)
@@ -178,8 +180,9 @@ void renderGUI(AudioEngine& audioEngine) {
             static_cast<int>(1.0f * audioEngine.granEng.Hs * audioEngine.granEng.size)
         );
         ImGui::Text("Current Ha: %d", audioEngine.granEng.Ha);
-        ImGui::Text("Current Hs: %d", audioEngine.granEng.Hs);
+        ImGui::Text("Current Hs: %d", audioEngine.granEng.Hs); */
 
+        ImGui::SeparatorText("Master");
         // Volume knob
         float mVol = audioEngine.masterVolume.load();
         if (ImGuiKnobs::Knob("Master Volume", &mVol, 0.0f, 1.0f, knobSpeed, "%.2f", ImGuiKnobVariant_Tick)) {

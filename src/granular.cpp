@@ -1,3 +1,6 @@
+/* granular.cpp
+Objects and functions relating to grains */
+
 #include <iostream>
 
 #include "granular.h"
@@ -36,10 +39,10 @@ void Grain::outputStereo(float& l, float& r) {
     index += interval;
 }
 
-void Grain::trigger(int s, int l, float p, float pitch) {
-    start = s;
-    size = l;
-    pan = p;
+void Grain::trigger(int grainStart, int grainLength, float grainPan, float pitch) {
+    start = grainStart;
+    size = grainLength;
+    pan = grainPan;
     interval = pitch;
     index = 0;
     isPlaying = true;
@@ -74,26 +77,31 @@ GranularEngine::GranularEngine(AudioFileData& audiodata)
 
 void GranularEngine::playback(float& l, float& r) {
     for (int i = 0; i < density; i++) {
-        int jitOffset = 0;
-        if (jitterAmount > 0) {
-            // can shift trigger time up to Hs/2 frames early or late 
-            jitOffset = (Hs / -2.0f + distrib(gen) / 100.0f * Hs) * jitterAmount;
-        }
-        int spreadOffset = 0;
-        if (spread > 0) {
-            spreadOffset = spread * (distrib(gen) * audioSize / 100.0f);
-        }
         // ensure jitter doesn't cause the index to be < 0
-        if (index % Hs == std::max(0, i * Hs / density + jitOffset)) {
+        if (index % Hs == std::min(Hs-1, std::max(0, i * Hs / density + jitOffset))) {
+            if (jitterAmount > 0) {
+                // can shift trigger time up to Hs/2 frames early or late 
+                jitOffset = (Hs / -2.0f + distrib(gen) / 100.0f * Hs) * jitterAmount;
+            } else {
+                jitOffset = 0;
+            }
             float pan = 0.5f;
             if (randomPanAmt > 0)
-                pan = (distrib(gen) / 100.0f - 0.5f) * randomPanAmt + 0.5f;
-            grains[i].trigger(
-                index / Hs * Ha + 1.0f * Ha / density * i + spreadOffset, 
-                1.0f * size * Hs, 
-                pan,
-                pitch
-            );
+                pan += (distrib(gen) / 100.0f - 0.5f) * randomPanAmt;
+            int spreadOffset = 0;
+            if (spread > 0)
+                spreadOffset = spread * (distrib(gen) * audioSize / 100.0f);
+            if (!grains[i].isPlaying) {
+                    grains[i].trigger(
+                    index / Hs * Ha + 1.0f * Ha / density * i + spreadOffset, 
+                    1.0f * size * Hs - jitOffset, 
+                    pan,
+                    pitch
+                );
+            }
+            // debug
+            /* std::cout << "Grain " << i << " triggered at " 
+                << std::max(0, i * Hs / density + jitOffset) << std::endl; */
         }
         if (grains[i].isPlaying)
             grains[i].outputStereo(l, r);

@@ -21,7 +21,7 @@ public:
 
     void outputStereo(float& l, float& r);
 
-    void trigger(int s, int l, float p, float pitch);
+    void trigger(int grainStart, int grainLength, float grainPan, float pitch);
 
     // Return values from audio data around point n necessary for interpolation
     std::vector<float> get4Points(int n);
@@ -36,6 +36,7 @@ public:
     
 class GranularEngine {
 private:
+    int jitOffset = 0;
     std::mt19937 gen; // mersenne_twister_engine seeded with rd()
     std::uniform_int_distribution<> distrib;
     int audioSize;
