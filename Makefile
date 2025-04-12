@@ -15,7 +15,7 @@ DR_DIR = ./libs/dr_libs
 # Source files
 ## Project source files
 SOURCES = $(SRC_DIR)/main.cpp $(SRC_DIR)/audio.cpp $(SRC_DIR)/gui.cpp \
-	$(SRC_DIR)/widgets.cpp $(SRC_DIR)/filemanager.cpp
+	$(SRC_DIR)/widgets.cpp $(SRC_DIR)/filemanager.cpp $(SRC_DIR)/granular.cpp
 ## ImGui source files
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp \
 	$(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp \

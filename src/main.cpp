@@ -76,7 +76,7 @@ int main(int, char**)
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Glaive Granular", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 400, 650, window_flags);
+    SDL_Window* window = SDL_CreateWindow("Glaive Granular", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 450, 650, window_flags);
     if (window == nullptr)
     {
         printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -106,7 +106,7 @@ int main(int, char**)
     // -- Custom style --
     ImGuiStyle& style = ImGui::GetStyle();
     style.AntiAliasedFill = true;
-    style.AntiAliasedLines = true; 
+    style.AntiAliasedLines = true;
     style.FrameRounding = 3.0f;
     ImVec4* colors = style.Colors;
     // Darker Background

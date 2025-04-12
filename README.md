@@ -6,8 +6,10 @@ Scans working directory for audio files, only supports WAV, FLAC and MP3. Once o
 Current makefile works for MacOS (10.6+) and Linux. Clone repo and submodules with `git clone --recurse-submodules https://github.com/matteobkh/glaive-granular`. Then run `make install-portaudio` (or just `cd libs/portaudio && ./configure && make`) then just `make`. Make sure SDL2 is installed and your compiler supports C++20.
 ## To Do
 - Refine GUI
-- Pitch shifting option
+- ~Pitch shifting option ✅~
+- _Improve_ pitch shifting, locked to semitones + fine tuning knob
 - Reverse grain probability
 - Fix time jitter (higher values cause clicks)
 - Add sample chopping
 - Add MIDI capability
+- Fix jitter and spread knob behaviors, very small increments are very noticeable so I'd like them to behave logarithmically but still be able to go to zero, not 0.1

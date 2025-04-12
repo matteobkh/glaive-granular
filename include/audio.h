@@ -8,50 +8,7 @@
 #include "portaudio.h"
 
 #include "filemanager.h"
-
-#define MAX_GRAINS (20)
-
-// Stereo grain with dynamic envelope
-class Grain {
-private:
-    std::vector<float>* data;
-    int index, start, size; // size could be a percentage of Hs
-    float pan, envelope;
-public:
-    bool isPlaying;
-
-    Grain(std::vector<float>* audioSamples = nullptr) ;
-
-    void output(float& l, float& r);
-
-    void trigger(int s, int l, float p);
-
-    // Returns current index relative to the inputted audio samples
-    inline int getCurrentRelIndex() { return index + start; };
-
-    inline float getEnvelope() {
-        return isPlaying ? envelope : 0;
-    }
-};
-    
-class GranularEngine {
-private:
-    std::mt19937 gen; // mersenne_twister_engine seeded with rd()
-    std::uniform_int_distribution<> distrib;
-    int audioSize;
-public:
-    std::vector<Grain> grains;
-    int index, Hs, Ha, density;
-    // size ∈ [0,1), jitterAmount ∈ [0,1], randomPanAmt ∈ [0,1], 
-    float size, stretch, jitterAmount, randomPanAmt, spread;
-
-    GranularEngine(std::vector<float>& audioSamples);
-
-    void playback(float& l, float& r);
-
-    // update parameters, to leave parameters the same input any number <=0
-    void updateParameters(float newSize = 0, float newStretch = 0, int newDensity = 0, int newHa = 0);
-};
+#include "granular.h"
 
 // Struct that contains all audio objects used in the program for easy access
 struct AudioEngine {
