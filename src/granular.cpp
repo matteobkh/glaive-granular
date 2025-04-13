@@ -66,8 +66,9 @@ std::vector<float> Grain::get4Points(int n) {
 // -- Granular engine class defs --
 GranularEngine::GranularEngine(AudioFileData& audiodata) 
     :   audioSize(audiodata.size), grains(MAX_GRAINS, &audiodata), 
-        index(0), Hs(6000), Ha(3000), density(2), size(0.6f), stretch(2.0f), 
-        jitterAmount(0.0f), randomPanAmt(0.0f), spread(0.0f), pitch(1.0f)
+        index(0), Hs(6000), Ha(3000), density(2), semitones(0), cents(0), 
+        size(0.6f), stretch(2.0f), jitterAmount(0.0f), randomPanAmt(0.0f), 
+        spread(0.0f), pitch(1.0f)
 {
     std::random_device rd;
     gen = std::mt19937(rd());
@@ -109,7 +110,7 @@ void GranularEngine::playback(float& l, float& r) {
     index++;
 }
 
-void GranularEngine::updateParameters(float newSize, float newStretch, int newDensity, int newHa) {
+void GranularEngine::updateParameters(float newSize, float newStretch, int newDensity, int newHa, int newSemitones, int newCents) {
     if (newSize > 0)
         size = newSize;
     if (newStretch > 0) {
@@ -135,5 +136,13 @@ void GranularEngine::updateParameters(float newSize, float newStretch, int newDe
     if (newHa > 0) {
         Ha = newHa;
         Hs = Ha * stretch;
+    }
+    if (newSemitones >= -24 && newSemitones <= 24) {
+        semitones = newSemitones;
+        pitch = 1.0f / pow(2.0f, -semitones / 12.0f) * pow(2.0f, cents / 1200.0f);
+    }
+    if (newCents >= -100 && newCents <= 100) {
+        cents = newCents;
+        pitch = 1.0f / pow(2.0f, -semitones / 12.0f) * pow(2.0f, cents / 1200.0f);
     }
 }

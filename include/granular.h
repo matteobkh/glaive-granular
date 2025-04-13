@@ -42,7 +42,7 @@ private:
     int audioSize;
 public:
     std::vector<Grain> grains;
-    int index, Hs, Ha, density;
+    int index, Hs, Ha, density, semitones, cents;
     // size ∈ [0,1), jitterAmount ∈ [0,1], randomPanAmt ∈ [0,1], 
     float size, stretch, jitterAmount, randomPanAmt, spread, pitch;
 
@@ -51,7 +51,7 @@ public:
     void playback(float& l, float& r);
 
     // update parameters, to leave parameters the same input any number <=0
-    void updateParameters(float newSize = 0, float newStretch = 0, int newDensity = 0, int newHa = 0);
+    void updateParameters(float newSize = 0, float newStretch = 0, int newDensity = 0, int newHa = 0, int newSemitones = 25, int newCents = 101);
 };
 
 #endif //GRANULAR_H
