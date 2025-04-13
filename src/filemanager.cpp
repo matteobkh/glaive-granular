@@ -17,10 +17,6 @@ working directory */
 
 #include "filemanager.h"
 
-// -- global variables definitions --
-bool FileManager::fileSelected = false;
-std::vector<std::string> FileManager::files;
-
 // AudioFileData struct def
 AudioFileData::AudioFileData(std::vector<float> samplesVec, int numChannels, int sRate) 
     : samples(samplesVec), nChannels(numChannels), sampleRate(sRate), size(samples.size()), frames(size/nChannels) {}

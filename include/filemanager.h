@@ -14,11 +14,14 @@ struct AudioFileData {
 };
 
 namespace FileManager {
-    extern bool fileSelected;
-    extern std::vector<std::string> files;
+    inline bool fileLoaded = false;
+    inline bool loading = false;
+    inline std::string currentFileName;
 
     // Extract audio data from file and store it in an AudioFileData struct
     AudioFileData LoadAudioFile(std::string filename);
 }
+
+
 
 #endif // FILEMANAGER_H

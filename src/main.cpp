@@ -11,6 +11,7 @@ Matteo Bukhgalter 2025 */
 
 #include <iostream>
 #include <filesystem>
+#include <thread>
 
 namespace fs = std::filesystem;
 
@@ -93,6 +94,9 @@ int main(int, char**)
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
+    //Enable drop file
+    SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -141,27 +145,7 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Load Fonts
-    io.Fonts->AddFontFromFileTTF("libs/imgui/misc/fonts/DroidSans.ttf", 15.0f);
-
-    // Load audio files from working directory
-    std::vector<std::string> files_strings;
-    try {
-        for (const auto& entry : fs::directory_iterator(fs::current_path())) {
-            auto ext = entry.path().extension();
-            if (entry.is_regular_file() && (ext == ".wav" || ext == ".flac" || ext == ".mp3")) {
-                files_strings.push_back(entry.path().filename());
-            }
-        }
-    } catch (const fs::filesystem_error& e) {
-        std::cerr << "Filesystem error: " << e.what() << '\n';
-    } catch (const std::exception& e) {
-        std::cerr << "General error: " << e.what() << '\n';
-    }
-    std::cout << "Audio files found:" << std::endl;
-    for(auto& f : files_strings) {
-        std::cout << f << std::endl;
-        FileManager::files.push_back(f);
-    }
+    io.Fonts->AddFontFromFileTTF("./libs/imgui/misc/fonts/DroidSans.ttf", 15.0f);
 
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -189,6 +173,39 @@ int main(int, char**)
                 done = true;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
+            if (event.type == SDL_DROPFILE) { // handle loading audio file from drag and drop
+                char* droppedFilePath = event.drop.file;
+                std::string pathStr(droppedFilePath);
+                SDL_free(droppedFilePath); // free early — it's copied into pathStr
+
+                std::string ext = fs::path(pathStr).extension().string();
+                if (ext == ".wav" || ext == ".mp3" || ext == ".flac") {
+                    if (audioEngine.granularPlaying.load()) {
+                        audioEngine.granularPlaying.store(false);
+                    }
+
+                    FileManager::loading = true;
+                    FileManager::fileLoaded = false;
+                    FileManager::currentFileName = fs::path(pathStr).filename().string();
+
+                    // Launch background thread to load audio
+                    std::thread([&, pathStr]() {
+                        audioEngine.audioData = FileManager::LoadAudioFile(pathStr);
+
+                        std::cout << "Audio file loaded!" << std::endl
+                                << "\tFile name: " << FileManager::currentFileName << std::endl
+                                << "\tSample rate: " << audioEngine.audioData.sampleRate << std::endl
+                                << "\tChannels: " << audioEngine.audioData.nChannels << std::endl
+                                << "\tSize (in samples): " << audioEngine.audioData.size << std::endl;
+
+                        audioEngine.granEng = GranularEngine(audioEngine.audioData);
+                        FileManager::fileLoaded = true;
+                        FileManager::loading = false;
+                    }).detach(); // fire and forget
+                } else {
+                    std::cerr << "Unsupported file type dropped: " << ext << "\n";
+                }
+            }
         }
         if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED)
         {

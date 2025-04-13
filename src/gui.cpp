@@ -18,11 +18,6 @@ Contains GUI window to be rendered in main loop */
 #define FAST (0.0f)
 #define SLOW (0.0003f)
 
-static int currentItem = -1;
-
-/* const char** items = FileManager::files.data();
-static const char* current_item = NULL; */
-
 // Oscillator bank window
 void renderGUI(AudioEngine& audioEngine) {
     // Toggle fine tuning knobs
@@ -37,28 +32,11 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove | 
         ImGuiWindowFlags_NoTitleBar);
 
-    std::vector<const char*> files_cstrs;
-    for (const auto& item : FileManager::files)
-        files_cstrs.push_back(item.c_str());
-
-    if(ImGui::Combo("Select audio file", &currentItem, files_cstrs.data(), static_cast<int>(files_cstrs.size()))) {
-        if (audioEngine.granularPlaying.load()) 
-            audioEngine.granularPlaying.store(false);
-        audioEngine.audioData = FileManager::LoadAudioFile(FileManager::files[currentItem]);
-        std::cout << "Audio file loaded!" << std::endl 
-            << "\tFile name: " << FileManager::files[currentItem] << std::endl
-            << "\tSample rate: " << audioEngine.audioData.sampleRate << std::endl
-            << "\tChannels: " << audioEngine.audioData.nChannels << std::endl 
-            << "\tSize (in samples): " << audioEngine.audioData.size << std::endl;
-        audioEngine.granEng = GranularEngine(audioEngine.audioData);
-        FileManager::fileSelected = true;
-    }
-
-    if (FileManager::fileSelected){
+    if (FileManager::fileLoaded){
         ImVec2 scopeSize = ImVec2(ImGui::GetContentRegionAvail().x,100);
 
         // scope
-        ImGui::Text("Waveform");
+        ImGui::SeparatorText(FileManager::currentFileName.c_str());
         // 
         ImGui::PushID(0);
         ImVec2 plotPos = ImGui::GetCursorScreenPos();
@@ -109,7 +87,7 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(padding + spacing + knobWidth); // Position knob
         // Knob for Stretch Factor (values between 0.1 and 10.0)
-        if (ImGuiKnobs::Knob("Speed", &audioEngine.granEng.stretch, 0.1f, 10.0f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick)) {
+        if (ImGuiKnobs::Knob("Stretch", &audioEngine.granEng.stretch, 0.1f, 10.0f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick)) {
             // Recalculate the granular engine parameters whenever the stretch factor is updated
             audioEngine.granEng.updateParameters(0, audioEngine.granEng.stretch);
         }
@@ -232,6 +210,18 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::Text("Current Ha: %d", audioEngine.granEng.Ha);
         ImGui::Text("Current Hs: %d", audioEngine.granEng.Hs);
         ImGui::Text("Current pitch: %.3f", audioEngine.granEng.pitch); */
+    } else {
+        const char* text;
+        if (FileManager::loading)
+            text = "Loading file...";
+        else
+            text = "Please drag and drop an audio file\nin one of the following formats:\n.wav, .flac or .mp3";
+        ImVec2 textSize = ImGui::CalcTextSize(text, ImGui::FindRenderedTextEnd(text));
+        ImGui::SetCursorPos(ImVec2(
+            ImGui::GetWindowWidth() / 2 - textSize.x / 2,
+            ImGui::GetWindowHeight() / 2 - textSize.y / 2
+        ));
+        ImGui::Text("%s", text);
     }
 
     ImGui::End();
