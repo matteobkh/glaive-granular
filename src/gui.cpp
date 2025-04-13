@@ -129,8 +129,6 @@ void renderGUI(AudioEngine& audioEngine) {
             audioEngine.granEng.randomPanAmt = 0.0f;
         }
         ImGui::SameLine();
-        /* ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
-        ImGui::SameLine(); */
         ImGui::SetCursorPosX(padding + 2 * (spacing + knobWidth)); // Position knob
         // Spread knob
         ImGuiKnobs::Knob("Spread", &audioEngine.granEng.spread, 0.0f, 0.5f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick);
@@ -161,9 +159,7 @@ void renderGUI(AudioEngine& audioEngine) {
         );
         ImGui::SeparatorText("Master");
         ImGui::EndChild();
-       // ImGui::SameLine();
-        //ImGui::SetCursorPosX(padding + 2 * (spacing + knobWidth));
-        //ImGui::SeparatorText("Master");
+
         // Knob for pitch in semitones
         if (ImGuiKnobs::KnobInt("Semitones", &audioEngine.granEng.semitones, -24, 24, 0.0f, "%d", ImGuiKnobVariant_Stepped, 0.0f, 0, 13)) {
             // Recalculates pitch when semitones changes
@@ -183,6 +179,7 @@ void renderGUI(AudioEngine& audioEngine) {
             audioEngine.granEng.updateParameters(0,0,0,0,25,0);
         }
         ImGui::SameLine();
+
         ImGui::SetCursorPosX(ImGui::GetWindowWidth()/2 + padding/2);
         ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
         ImGui::SameLine();
