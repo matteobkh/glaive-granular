@@ -21,7 +21,7 @@ public:
 
     void outputStereo(float& l, float& r);
 
-    void trigger(int grainStart, int grainLength, float grainPan, float pitch);
+    void trigger(int grainStart, int grainLength, float grainPan, float pitch, bool reverse);
 
     // Return values from audio data around point n necessary for interpolation
     std::vector<float> get4Points(int n);
@@ -42,7 +42,7 @@ private:
     int audioSize;
 public:
     std::vector<Grain> grains;
-    int index, Hs, Ha, density, semitones, cents;
+    int index, Hs, Ha, density, semitones, cents, revprob;
     // size ∈ [0,1), jitterAmount ∈ [0,1], randomPanAmt ∈ [0,1], 
     float size, stretch, jitterAmount, randomPanAmt, spread, pitch;
 

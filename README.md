@@ -17,6 +17,7 @@ All randomizers use normal distribution curve
 - **Jitter**: introduces randomness into the timing of the playback of each grain
 - **Pan**: randomly pans each grain left or right by a random amount
 - **Spread**: increase the chance of taking a grain from later in the sample relative to the current playback index
+- **Reverse probability**: percent chance with which each grain may play backwards
 ### Pitch controls
 - **Semitones**: pitch grains up or down by up to 24 semitones (2 octaves)
 - **Cents**: fine tune the pitch of the grains up or down 100 cents (1 semitone)
@@ -27,9 +28,10 @@ All randomizers use normal distribution curve
 - Refine GUI
 - ~Pitch shifting option ✅~
 - ~_Improve_ pitch shifting, locked to semitones + fine tuning knob~
-- Reverse grain probability
+- ~Reverse grain probability~
 - ~Fix time jitter (higher values cause clicks) ✅~
 - Add sample chopping
 - Add MIDI capability
-- Fix spread knob behavior, very small increments are very noticeable so I'd like it to behave logarithmically but still be able to go to zero, not 0.1
+- ~Fix spread knob behavior, very small increments are very noticeable so I'd like it to behave logarithmically but still be able to go to zero, not 0.1 ✅~
+- _Improve_ spread functionality
 - Reverse playback (negative playback speed)

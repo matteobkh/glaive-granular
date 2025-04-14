@@ -173,9 +173,18 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::SameLine();
         ImGui::SetCursorPosX(padding + 2 * (spacing + knobWidth)); // Position knob
         // Spread knob
-        ImGuiKnobs::Knob("Spread", &audioEngine.granEng.spread, 0.0f, 0.5f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick);
+        ImGuiKnobs::Knob("Spread", &audioEngine.granEng.spread, 0.0004f, 1.0f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick, 0.0f, ImGuiKnobFlags_Logarithmic);
         if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
             audioEngine.granEng.spread = 0.0f;
+        }
+        /* if (audioEngine.granEng.spread <= 0.001f)
+            audioEngine.granEng.spread = 0.0f; */
+        ImGui::SameLine();
+        ImGui::SetCursorPosX(padding + 3 * (spacing + knobWidth)); // Position knob
+        // Reverse grain probability knob
+        ImGuiKnobs::KnobInt("Reverse Prob.", &audioEngine.granEng.revprob,0,100,0.0f,"%d%%",ImGuiKnobVariant_Tick);
+        if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
+            audioEngine.granEng.revprob = 0;
         }
 
         ImGui::BeginChild(
@@ -236,11 +245,12 @@ void renderGUI(AudioEngine& audioEngine) {
             audioEngine.masterVolume.store(mVol);
         }
 
-        // Display the current values for debugging
+        // Display debug information
         if (ImGui::IsKeyPressed(ImGuiKey_D, false) && ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
             debug = !debug;
 
         if (debug) {
+            ImGui::SeparatorText("Debug");
             ImGui::Text("Current s. index: %d", audioEngine.granEng.index);
             ImGui::Text(
                 "Current a. index: %d", 

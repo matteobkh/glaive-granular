@@ -20,7 +20,7 @@ Grain::Grain(AudioFileData* audioData)
       pan(0.5f), envelope(0.0f), isPlaying(false) {}
 
 void Grain::outputStereo(float& l, float& r) {
-    if (!isPlaying || !data || index / interval >= size || (start + size) * 2 >= data->size) {
+    if (!isPlaying || !data || index / interval >= size || (start + size) * 2 >= data->size || index < 0) {
         isPlaying = false;
         return;
     }
@@ -39,12 +39,18 @@ void Grain::outputStereo(float& l, float& r) {
     index += interval;
 }
 
-void Grain::trigger(int grainStart, int grainLength, float grainPan, float pitch) {
-    start = grainStart;
+void Grain::trigger(int grainStart, int grainLength, float grainPan, float pitch, bool reverse) {
     size = grainLength;
     pan = grainPan;
-    interval = pitch;
-    index = 0;
+    if (reverse) {
+        start = grainStart + grainLength - 1;
+        interval = -pitch;
+        index = grainLength - 1;
+    } else {
+        start = grainStart;
+        interval = pitch;
+        index = 0;
+    }
     isPlaying = true;
     // for debug:
     //std::cout << "Grain " << i << " triggered at " << s << std::endl;
@@ -67,8 +73,8 @@ std::vector<float> Grain::get4Points(int n) {
 GranularEngine::GranularEngine(AudioFileData& audiodata) 
     :   audioSize(audiodata.size), grains(MAX_GRAINS, &audiodata), 
         index(0), Hs(6000), Ha(3000), density(2), semitones(0), cents(0), 
-        size(0.6f), stretch(2.0f), jitterAmount(0.0f), randomPanAmt(0.0f), 
-        spread(0.0f), pitch(1.0f)
+        revprob(0), size(0.6f), stretch(2.0f), jitterAmount(0.0f), 
+        randomPanAmt(0.0f), spread(0.0f), pitch(1.0f)
 {
     std::random_device rd;
     gen = std::mt19937(rd());
@@ -90,14 +96,15 @@ void GranularEngine::playback(float& l, float& r) {
             if (randomPanAmt > 0)
                 pan += (distrib(gen) / 100.0f - 0.5f) * randomPanAmt;
             int spreadOffset = 0;
-            if (spread > 0)
+            if (spread > 0.001f)
                 spreadOffset = spread * (distrib(gen) * audioSize / 100.0f);
             if (!grains[i].isPlaying) {
                     grains[i].trigger(
                     index / Hs * Ha + 1.0f * Ha / density * i + spreadOffset, 
                     1.0f * size * Hs - jitOffset, 
                     pan,
-                    pitch
+                    pitch,
+                    distrib(gen) < revprob
                 );
             }
             // debug
