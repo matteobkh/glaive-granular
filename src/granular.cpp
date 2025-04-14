@@ -20,12 +20,12 @@ Grain::Grain(AudioFileData* audioData)
       pan(0.5f), envelope(0.0f), isPlaying(false) {}
 
 void Grain::outputStereo(float& l, float& r) {
-    if (!isPlaying || !data || index / interval >= size || (start + size) * 2 >= data->size || index < 0) {
+    if (!isPlaying || !data || index / abs(interval) >= size || (start + size) * 2 >= data->size || index < 0) {
         isPlaying = false;
         return;
     }
     // hann window
-    envelope = cosf(2.0f * M_PI * (index / interval / size) + M_PI) / 2.0f + 0.5f;
+    envelope = cosf(2.0f * M_PI * (index / abs(interval) / size) + M_PI) / 2.0f + 0.5f;
     int n = static_cast<int>(start + index) * 2;
     float t = index - floor(index);
     std::vector<float> p = get4Points(n);
@@ -96,10 +96,10 @@ void GranularEngine::playback(float& l, float& r) {
             if (randomPanAmt > 0)
                 pan += (distrib(gen) / 100.0f - 0.5f) * randomPanAmt;
             int spreadOffset = 0;
-            if (spread > 0.001f)
+            if (spread >= 0.0004f)
                 spreadOffset = spread * (distrib(gen) * audioSize / 100.0f);
             if (!grains[i].isPlaying) {
-                    grains[i].trigger(
+                grains[i].trigger(
                     index / Hs * Ha + 1.0f * Ha / density * i + spreadOffset, 
                     1.0f * size * Hs - jitOffset, 
                     pan,

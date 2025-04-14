@@ -132,6 +132,10 @@ void renderGUI(AudioEngine& audioEngine) {
         if (ImGuiKnobs::Knob("Stretch", &audioEngine.granEng.stretch, 0.1f, 10.0f, knobSpeed, "%.3f", ImGuiKnobVariant_Tick)) {
             // Recalculate the granular engine parameters whenever the stretch factor is updated
             audioEngine.granEng.updateParameters(0, audioEngine.granEng.stretch);
+            int scaledStartPoint = audioEngine.start * audioEngine.audioData.frames * audioEngine.granEng.stretch;
+            if (audioEngine.granEng.index < scaledStartPoint) {
+                audioEngine.granEng.index = scaledStartPoint+1;
+            }
         }
         if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset default
             audioEngine.granEng.updateParameters(0, 2.0f);
@@ -177,8 +181,6 @@ void renderGUI(AudioEngine& audioEngine) {
         if (ImGui::IsItemActive() && ImGui::IsMouseDoubleClicked(0)) { //double click to reset
             audioEngine.granEng.spread = 0.0f;
         }
-        /* if (audioEngine.granEng.spread <= 0.001f)
-            audioEngine.granEng.spread = 0.0f; */
         ImGui::SameLine();
         ImGui::SetCursorPosX(padding + 3 * (spacing + knobWidth)); // Position knob
         // Reverse grain probability knob

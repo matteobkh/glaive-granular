@@ -1,6 +1,7 @@
 # MAKEFILE FOR MACOS AND LINUX #
 
 CXX = g++
+CXX_VERSION = c++17
 
 # Name of the executable
 EXEC = GlaiveGranular
@@ -30,7 +31,7 @@ OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
 # Build flags, includes, links
-CXXFLAGS = -std=c++20 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
+CXXFLAGS = -std=$(CXX_VERSION) -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
 CXXFLAGS += -I$(IMGUI_KNOBS_DIR) -I$(PA_DIR)/include
 CXXFLAGS += -I$(DR_DIR) -I./include
 CXXFLAGS += -g -Wall -Wformat -pthread

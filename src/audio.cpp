@@ -16,7 +16,8 @@ static PaStream* stream;
 
 // -- AudioEngine struct defs --
 AudioEngine::AudioEngine(const int sr, AudioFileData aData, float vol)
-    : sampleRate(sr), audioData(aData), granEng(audioData), masterVolume(vol)
+    : sampleRate(sr), audioData(aData), granEng(audioData), loop(false),
+    start(0.0f), end(1.0f), masterVolume(vol)
 {
     std::cout << "AudioEngine created! Sample Rate = " << sampleRate << std::endl;
 }
@@ -25,7 +26,8 @@ void AudioEngine::processAudio(float& l, float& r) {
     if (granularPlaying) {
         granEng.playback(l, r);
     }
-    if (granEng.index >= end * audioData.frames * granEng.stretch) {
+    // Handles looping
+    if (granEng.index + granEng.size * granEng.Ha >= end * audioData.frames * granEng.stretch) {
         if (!loop) granularPlaying.store(false);
         granEng.index = start * audioData.frames * granEng.stretch;
     }
