@@ -18,6 +18,8 @@ struct AudioEngine {
     GranularEngine granEng;
     std::atomic<bool> granularPlaying{false};
     bool loop = false;
+    float start = 0.0f; //defines lower playback bound
+    float end = 1.0f; //defines upper playback bound
     
     // room for more objects
 

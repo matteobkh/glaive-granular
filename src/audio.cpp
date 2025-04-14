@@ -25,9 +25,9 @@ void AudioEngine::processAudio(float& l, float& r) {
     if (granularPlaying) {
         granEng.playback(l, r);
     }
-    if (granEng.index >= audioData.frames * granEng.stretch) {
+    if (granEng.index >= end * audioData.frames * granEng.stretch) {
         if (!loop) granularPlaying.store(false);
-        granEng.index = 0;
+        granEng.index = start * audioData.frames * granEng.stretch;
     }
     l *= masterVolume.load();
     r *= masterVolume.load();

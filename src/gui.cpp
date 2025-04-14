@@ -18,7 +18,6 @@ Contains GUI window to be rendered in main loop */
 #define FAST (0.0f)
 #define SLOW (0.0003f)
 
-// Oscillator bank window
 void renderGUI(AudioEngine& audioEngine) {
     // Toggle fine tuning knobs
     float knobSpeed = FAST;
@@ -35,23 +34,68 @@ void renderGUI(AudioEngine& audioEngine) {
     if (FileManager::fileLoaded){
         ImVec2 scopeSize = ImVec2(ImGui::GetContentRegionAvail().x,100);
 
+        // get window padding
+        float padding = ImGui::GetStyle().WindowPadding.x;
+
         // scope
         ImGui::SeparatorText(FileManager::currentFileName.c_str());
-        // 
+
         ImGui::PushID(0);
         ImVec2 plotPos = ImGui::GetCursorScreenPos();
         ImGui::SetNextItemAllowOverlap();
+        // render audio file waveform
         Widgets::PlotLines(
             "##audio", 
             audioEngine.audioData.samples.data(), 
             audioEngine.audioData.samples.size(), 
             0, nullptr, -1.0f, 1.0f, scopeSize
         );
+        // Render playheads for each grain currently playing
         for (int i = 0; i < audioEngine.granEng.density; i++) {
             Grain& g = audioEngine.granEng.grains[i];
             ImGui::SetCursorScreenPos(plotPos);
             Widgets::Playhead(1.0f * g.getCurrentRelIndex() / audioEngine.audioData.frames, scopeSize, g.getEnvelope());
         }
+        // render start and end points
+        ImGui::SetCursorScreenPos(ImVec2(plotPos.x+audioEngine.start*scopeSize.x, plotPos.y));
+        ImGui::Button("##start", ImVec2(2.5f, scopeSize.y));
+        if (ImGui::IsItemActive()) { // defines button behavior when clicked and dragged
+            audioEngine.start = std::min(
+                std::max(0.0f, (ImGui::GetIO().MousePos.x - padding) / scopeSize.x), 
+                audioEngine.end - 0.01f
+            );
+            int scaledStartPoint = audioEngine.start * audioEngine.audioData.frames * audioEngine.granEng.stretch;
+            if (audioEngine.granEng.index < scaledStartPoint) {
+                audioEngine.granEng.index = scaledStartPoint+1;
+            }
+            ImGui::BeginTooltip();
+            ImGui::Text("Start: %f", audioEngine.start);
+            ImGui::EndTooltip();
+        } else if (ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip)) {
+            ImGui::BeginTooltip();
+            ImGui::Text("Start: %f", audioEngine.start);
+            ImGui::EndTooltip();
+        }
+        
+        ImGui::SetCursorScreenPos(ImVec2(plotPos.x+audioEngine.end*scopeSize.x, plotPos.y));
+        ImGui::Button("##end", ImVec2(2.5f, scopeSize.y));
+        if (ImGui::IsItemActive()) { // defines button behavior when clicked and dragged
+            audioEngine.end = std::min(
+                std::max(
+                    audioEngine.start + 0.01f, 
+                    (ImGui::GetIO().MousePos.x - padding) / scopeSize.x
+                ),
+                1.0f
+            );
+            ImGui::BeginTooltip();
+            ImGui::Text("End: %f", audioEngine.end);
+            ImGui::EndTooltip();
+        } else if (ImGui::IsItemHovered(ImGuiHoveredFlags_ForTooltip)) {
+            ImGui::BeginTooltip();
+            ImGui::Text("End: %f", audioEngine.end);
+            ImGui::EndTooltip();
+        }
+        
         ImGui::PopID();
 
         // Button or space bar to play/pause 
@@ -63,7 +107,7 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::SameLine();
         if(ImGui::Button("Stop")) {
             audioEngine.granularPlaying.store(false);
-            audioEngine.granEng.index = 0;
+            audioEngine.granEng.index = audioEngine.start * audioEngine.audioData.frames;
         }
         ImGui::SameLine();
         Widgets::Checkbox("Loop", &audioEngine.loop);
@@ -71,7 +115,6 @@ void renderGUI(AudioEngine& audioEngine) {
         // even knob spacing
         int knobsPerRow = 4;
         float windowWidth = ImGui::GetContentRegionAvail().x;
-        float padding = ImGui::GetStyle().WindowPadding.x;
         float knobWidth = ImGui::GetTextLineHeight() * 4.0f;  // Default knob size
         float spacing = (windowWidth - (knobsPerRow * knobWidth)) / knobsPerRow; // Even spacing
 
@@ -195,7 +238,7 @@ void renderGUI(AudioEngine& audioEngine) {
         }
 
         // Display the current values for debugging
-        /* ImGui::Text("Current s. index: %d", audioEngine.granEng.index);
+        ImGui::Text("Current s. index: %d", audioEngine.granEng.index);
         ImGui::Text(
             "Current a. index: %d", 
             static_cast<int>(1.0f * audioEngine.granEng.index / audioEngine.granEng.stretch)
@@ -206,7 +249,8 @@ void renderGUI(AudioEngine& audioEngine) {
         );
         ImGui::Text("Current Ha: %d", audioEngine.granEng.Ha);
         ImGui::Text("Current Hs: %d", audioEngine.granEng.Hs);
-        ImGui::Text("Current pitch: %.3f", audioEngine.granEng.pitch); */
+        ImGui::Text("Current pitch: %.3f", audioEngine.granEng.pitch); 
+        ImGui::Text("Playback start: %f, end: %f", audioEngine.start, audioEngine.end);
     } else {
         const char* text;
         if (FileManager::loading)
