@@ -18,6 +18,8 @@ Contains GUI window to be rendered in main loop */
 #define FAST (0.0f)
 #define SLOW (0.0003f)
 
+static bool debug = false;
+
 void renderGUI(AudioEngine& audioEngine) {
     // Toggle fine tuning knobs
     float knobSpeed = FAST;
@@ -95,14 +97,11 @@ void renderGUI(AudioEngine& audioEngine) {
             ImGui::Text("End: %f", audioEngine.end);
             ImGui::EndTooltip();
         }
-        
-        ImGui::PopID();
+        ImGui::PopID(); //0
 
         // Button or space bar to play/pause 
         if(ImGui::Button("Play/Pause") || ImGui::IsKeyPressed(ImGuiKey_Space, false)) {
-            audioEngine.granularPlaying.load() 
-                ? audioEngine.granularPlaying.store(false) 
-                : audioEngine.granularPlaying.store(true);
+            audioEngine.granularPlaying.store(!audioEngine.granularPlaying.load());
         }
         ImGui::SameLine();
         if(ImGui::Button("Stop")) {
@@ -186,7 +185,7 @@ void renderGUI(AudioEngine& audioEngine) {
                 ImGui::CalcTextSize("Gp", ImGui::FindRenderedTextEnd("Gp"), false).y+3.0f
             ),
             ImGuiChildFlags_None,
-            ImGuiWindowFlags_NoScrollbar
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
         );
         ImGui::SeparatorText("Grain pitch");
         ImGui::EndChild();
@@ -194,11 +193,11 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::BeginChild(
             "c2", 
             ImVec2(
-                ImGui::GetWindowWidth()/2-padding*2, 
+                ImGui::GetWindowWidth()/2-padding*2,
                 ImGui::CalcTextSize("Gp", ImGui::FindRenderedTextEnd("Gp"), false).y+3.0f
             ),
             ImGuiChildFlags_None,
-            ImGuiWindowFlags_NoScrollbar
+            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
         );
         ImGui::SeparatorText("Master");
         ImGui::EndChild();
@@ -238,19 +237,24 @@ void renderGUI(AudioEngine& audioEngine) {
         }
 
         // Display the current values for debugging
-        ImGui::Text("Current s. index: %d", audioEngine.granEng.index);
-        ImGui::Text(
-            "Current a. index: %d", 
-            static_cast<int>(1.0f * audioEngine.granEng.index / audioEngine.granEng.stretch)
-        );
-        ImGui::Text(
-            "Current grain size: %d", 
-            static_cast<int>(1.0f * audioEngine.granEng.Hs * audioEngine.granEng.size)
-        );
-        ImGui::Text("Current Ha: %d", audioEngine.granEng.Ha);
-        ImGui::Text("Current Hs: %d", audioEngine.granEng.Hs);
-        ImGui::Text("Current pitch: %.3f", audioEngine.granEng.pitch); 
-        ImGui::Text("Playback start: %f, end: %f", audioEngine.start, audioEngine.end);
+        if (ImGui::IsKeyPressed(ImGuiKey_D, false) && ImGui::IsKeyDown(ImGuiKey_LeftCtrl))
+            debug = !debug;
+
+        if (debug) {
+            ImGui::Text("Current s. index: %d", audioEngine.granEng.index);
+            ImGui::Text(
+                "Current a. index: %d", 
+                static_cast<int>(1.0f * audioEngine.granEng.index / audioEngine.granEng.stretch)
+            );
+            ImGui::Text(
+                "Current grain size: %d", 
+                static_cast<int>(1.0f * audioEngine.granEng.Hs * audioEngine.granEng.size)
+            );
+            ImGui::Text("Current Ha: %d", audioEngine.granEng.Ha);
+            ImGui::Text("Current Hs: %d", audioEngine.granEng.Hs);
+            ImGui::Text("Current pitch: %.3f", audioEngine.granEng.pitch); 
+            ImGui::Text("Playback start: %f, end: %f", audioEngine.start, audioEngine.end);
+        }
     } else {
         const char* text;
         if (FileManager::loading)
