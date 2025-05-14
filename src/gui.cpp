@@ -106,7 +106,8 @@ void renderGUI(AudioEngine& audioEngine) {
         ImGui::SameLine();
         if(ImGui::Button("Stop")) {
             audioEngine.granularPlaying.store(false);
-            audioEngine.granEng.index = audioEngine.start * audioEngine.audioData.frames;
+            audioEngine.granEng.index = audioEngine.start 
+                * audioEngine.audioData.frames * audioEngine.granEng.stretch;
         }
         ImGui::SameLine();
         Widgets::Checkbox("Loop", &audioEngine.loop);

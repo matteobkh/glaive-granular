@@ -1,7 +1,7 @@
 # MAKEFILE FOR MACOS AND LINUX #
 
 CXX = g++
-CXX_VERSION = c++17
+CXX_VERSION = c++20
 
 # Name of the executable
 EXEC = GlaiveGranular
